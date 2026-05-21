@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0f0f23 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .card { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 40px; width: 420px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+        h1 { color: #00ffff; font-size: 24px; text-shadow: 0 0 20px rgba(0,255,255,0.3); }
+        .admin-badge { font-size: 11px; background: rgba(255,51,102,0.2); color: #ff6699; border: 1px solid rgba(255,51,102,0.3); padding: 3px 8px; border-radius: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .msg { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
+        .msg.success { background: rgba(76,175,80,0.15); color: #69db7c; border: 1px solid rgba(76,175,80,0.3); }
+        .info-group { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
+        .info-row + .info-row { border-top: 1px solid rgba(255,255,255,0.06); }
+        .info-label { color: #8888aa; font-size: 13px; }
+        .info-value { color: #fff; font-size: 16px; font-weight: 600; }
+        .info-hint { color: #555577; font-size: 12px; margin-top: 12px; font-style: italic; }
+        .danger { margin-top: 24px; }
+        .danger h2 { color: #ff6b6b; font-size: 16px; margin-bottom: 12px; }
+        .btn-delete { width: 100%; padding: 12px; background: rgba(244,67,54,0.1); border: 1px solid rgba(244,67,54,0.3); border-radius: 8px; color: #ff6b6b; font-size: 15px; font-weight: 600; cursor: pointer; transition: transform 0.15s, background 0.15s; }
+        .btn-delete:hover { transform: translateY(-1px); background: rgba(244,67,54,0.2); }
+        .back { display: block; text-align: center; margin-top: 16px; color: #8888aa; text-decoration: none; font-size: 14px; }
+        .back:hover { color: #00ffff; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="header">
+            <h1>Profile</h1>
+            <span th:if="${user.admin}" class="admin-badge">Admin</span>
+        </div>
+        <div th:if="${success}" class="msg success" th:text="${success}"></div>
+        <div class="info-group">
+            <div class="info-row">
+                <span class="info-label">Username</span>
+                <span class="info-value" th:text="${user.username}"></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Highscore</span>
+                <span class="info-value" th:text="${user.highscore}">0</span>
+            </div>
+            <p class="info-hint">Highscore is only updated by playing the game.</p>
+        </div>
+        <div class="danger">
+            <h2>Danger Zone</h2>
+            <form th:action="@{/profile/delete}" method="post" onsubmit="return confirm('Are you sure you want to delete your account? This cannot be undone.');">
+                <button type="submit" class="btn-delete">Delete My Account</button>
+            </form>
+        </div>
+        <a th:href="@{/dashboard}" class="back">Back to Dashboard</a>
+    </div>
+</body>
+</html>
