@@ -1,0 +1,11 @@
+name: bullet-hell
+service:
+  source: github
+  builder: docker
+  dockerfile_path: ./Dockerfile
+  env:
+    - key: MONGODB_URI
+      value: YOUR_MONGODB_URI_HERE
+  ports:
+    - port: 8080
+      protocol: http
