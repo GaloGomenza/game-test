@@ -2,18 +2,17 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bullet Hell</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0f0f23 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .game-area { display: flex; justify-content: center; align-items: flex-start; width: 100%; position: relative; }
-        .game-col { display: flex; flex-direction: column; align-items: center; }
-        .top-bar { display: flex; align-items: center; justify-content: center; width: 500px; margin-bottom: 12px; }
+        .game-area { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 760px; }
+        .game-col { display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .top-bar { display: flex; align-items: center; justify-content: center; width: 100%; max-width: 500px; margin-bottom: 8px; }
         .top-bar h2 { color: #00ffff; font-size: 18px; text-shadow: 0 0 10px rgba(0,255,255,0.3); }
-        .top-bar .hs { color: #8888aa; font-size: 13px; }
-        .top-bar .hs span { color: #00ffff; font-weight: 700; }
-        #gameContainer { position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 0 30px rgba(0,255,255,0.15), 0 8px 32px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); }
-        #gameCanvas { display: block; }
+        #gameContainer { position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 0 30px rgba(0,255,255,0.15), 0 8px 32px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 500px; aspect-ratio: 1; }
+        #gameCanvas { display: block; width: 100%; height: 100%; touch-action: none; }
         #scoreOverlay { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); font-size: 20px; font-weight: 700; color: #fff; text-shadow: 0 0 10px rgba(0,0,0,0.8); pointer-events: none; font-variant-numeric: tabular-nums; }
         #startScreen, #gameOverScreen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(10,10,30,0.92); padding: 20px; }
         #gameOverScreen { display: none; }
@@ -30,19 +29,19 @@
         .btn-over { background: linear-gradient(135deg, #ff3366, #ff0088); color: #fff; }
         .btn-over:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(255,51,102,0.3); }
         .controls-hint { color: #555577; font-size: 12px; margin-top: 6px; }
-        .leaderboard { position: absolute; left: calc(50% + 262px); top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 20px; width: 220px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
-        .leaderboard h2 { color: #00ffff; font-size: 16px; margin-bottom: 14px; text-shadow: 0 0 10px rgba(0,255,255,0.2); text-align: center; }
-        .lb-entry { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; margin-bottom: 3px; }
+        .leaderboard { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 16px; width: 100%; max-width: 500px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); margin-top: 16px; }
+        .leaderboard h2 { color: #00ffff; font-size: 16px; margin-bottom: 10px; text-shadow: 0 0 10px rgba(0,255,255,0.2); text-align: center; }
+        .lb-entry { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 6px; margin-bottom: 2px; }
         .lb-entry.me { background: rgba(0,255,255,0.08); border: 1px solid rgba(0,255,255,0.12); }
-        .lb-rank { color: #555577; font-size: 12px; font-weight: 700; width: 16px; text-align: right; }
+        .lb-rank { color: #555577; font-size: 12px; font-weight: 700; width: 16px; text-align: right; flex-shrink: 0; }
         .lb-rank.gold { color: #ffd700; }
         .lb-rank.silver { color: #c0c0c0; }
         .lb-rank.bronze { color: #cd7f32; }
         .lb-name { color: #ccccee; font-size: 13px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .lb-name.me-label { color: #00ffff; }
-        .lb-score { color: #fff; font-size: 13px; font-weight: 700; }
+        .lb-score { color: #fff; font-size: 13px; font-weight: 700; flex-shrink: 0; }
         .lb-empty { color: #555577; text-align: center; font-size: 12px; padding: 16px 0; }
-        nav { margin-top: 16px; display: flex; gap: 16px; align-items: center; }
+        nav { margin-top: 16px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; justify-content: center; }
         nav a { color: #8888aa; text-decoration: none; font-size: 13px; }
         nav a:hover { color: #00ffff; }
         .btn-nav-logout { background: none; border: none; color: #8888aa; text-decoration: none; font-size: 13px; cursor: pointer; font-family: inherit; padding: 0; }
@@ -61,7 +60,7 @@
                 <div id="startScreen">
                     <h2>Bullet Hell</h2>
                     <p>Survive as long as you can</p>
-                    <p class="controls-hint">Arrow keys / WASD to move</p>
+                    <p class="controls-hint">Arrow keys / WASD or touch to move</p>
                     <button id="startBtn" class="btn btn-primary">Start Game</button>
                 </div>
                 <div id="gameOverScreen">
@@ -74,15 +73,15 @@
                     <button id="restartBtn" class="btn btn-over">Play Again</button>
                 </div>
             </div>
-        </div>
-        <div class="leaderboard">
-            <h2>Leaderboard</h2>
-            <div th:each="entry, iter : ${leaderboard}" class="lb-entry" th:classappend="${entry.username == user.username} ? 'me'">
-                <span class="lb-rank" th:classappend="${iter.index == 0} ? 'gold' : (${iter.index == 1} ? 'silver' : (${iter.index == 2} ? 'bronze' : ''))" th:text="${iter.index + 1}"></span>
-                <span class="lb-name" th:classappend="${entry.username == user.username} ? 'me-label'" th:text="${entry.username}"></span>
-                <span class="lb-score" th:text="${entry.highscore}"></span>
+            <div class="leaderboard">
+                <h2>Leaderboard</h2>
+                <div th:each="entry, iter : ${leaderboard}" class="lb-entry" th:classappend="${entry.username == user.username} ? 'me'">
+                    <span class="lb-rank" th:classappend="${iter.index == 0} ? 'gold' : (${iter.index == 1} ? 'silver' : (${iter.index == 2} ? 'bronze' : ''))" th:text="${iter.index + 1}"></span>
+                    <span class="lb-name" th:classappend="${entry.username == user.username} ? 'me-label'" th:text="${entry.username}"></span>
+                    <span class="lb-score" th:text="${entry.highscore}"></span>
+                </div>
+                <div th:if="${#lists.isEmpty(leaderboard)}" class="lb-empty">No players yet</div>
             </div>
-            <div th:if="${#lists.isEmpty(leaderboard)}" class="lb-empty">No players yet</div>
         </div>
     </div>
     <nav>

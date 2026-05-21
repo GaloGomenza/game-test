@@ -127,6 +127,15 @@ function movePlayer() {
     if (keys['ArrowRight'] || keys['KeyD']) player.vx += speed;
     if (keys['ArrowUp'] || keys['KeyW']) player.vy -= speed;
     if (keys['ArrowDown'] || keys['KeyS']) player.vy += speed;
+    if (touchTarget) {
+        const dx = touchTarget.x - player.x;
+        const dy = touchTarget.y - player.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist > 8) {
+            player.vx = (dx / dist) * speed;
+            player.vy = (dy / dist) * speed;
+        }
+    }
     player.x += player.vx;
     player.y += player.vy;
     player.x = Math.max(PLAYER_SIZE, Math.min(W - PLAYER_SIZE, player.x));
@@ -377,6 +386,22 @@ function draw() {
 const keys = {};
 document.addEventListener('keydown', e => { keys[e.code] = true; if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault(); });
 document.addEventListener('keyup', e => { keys[e.code] = false; });
+
+let touchTarget = null;
+
+function getTouchPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    return {
+        x: (touch.clientX - rect.left) * (canvas.width / rect.width),
+        y: (touch.clientY - rect.top) * (canvas.height / rect.height)
+    };
+}
+
+canvas.addEventListener('touchstart', e => { e.preventDefault(); touchTarget = getTouchPos(e); }, { passive: false });
+canvas.addEventListener('touchmove', e => { e.preventDefault(); touchTarget = getTouchPos(e); }, { passive: false });
+canvas.addEventListener('touchend', e => { e.preventDefault(); touchTarget = null; }, { passive: false });
+canvas.addEventListener('touchcancel', e => { touchTarget = null; });
 
 startBtn.addEventListener('click', startGame);
 restartBtn.addEventListener('click', startGame);
